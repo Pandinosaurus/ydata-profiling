@@ -1,13 +1,14 @@
 name: Multi-software test
 
-
 on:
   pull_request:
   push:
-    branches: 
+    branches:
     - master
     - develop
 
+env:
+  YDATA_PROFILING_NO_ANALYTICS: false
 
 jobs:
   test:
@@ -19,15 +20,18 @@ jobs:
         python-version: [ 3.8 ]
         pandas: ["pandas>1.1"]
         numpy: ["numpy"]
+        matplotlib: ["matplotlib<3.9"]
         include:
           - os: ubuntu-22.04
             python-version: 3.7.16
             pandas: "pandas>1.1"
             numpy: "numpy"
+            matplotlib: "matplotlib<3.6"
           - os: ubuntu-22.04
             python-version: 3.8
             pandas: "pandas>1.1"
             numpy: "numpy"
+            matplotlib: "matplotlib<3.9"
           - os: ubuntu-22.04
             python-version: 3.9
             pandas: "pandas>1.1"
@@ -79,6 +83,7 @@ jobs:
         pip install --upgrade pip setuptools wheel
         pip install -r requirements.txt "${{ matrix.pandas }}" "${{ matrix.numpy }}"
         pip install -r requirements-test.txt
+    - run: echo "YDATA_PROFILING_NO_ANALYTICS=False" >> $GITHUB_ENV
     - run: make install
 
     - run: make test
@@ -127,6 +132,7 @@ jobs:
         pip install --upgrade pip setuptools wheel
         pip install -r requirements.txt "${{ matrix.pandas }}" "${{ matrix.numpy }}"
         pip install -r requirements-test.txt
+        echo "YDATA_PROFILING_NO_ANALYTICS=False" >> $GITHUB_ENV
     - run: make install
 
     - run: make test_cov
@@ -167,6 +173,7 @@ jobs:
       HADOOP_VERSION: ${{ matrix.hadoop }}
       SPARK_DIRECTORY: ${{ github.workspace }}/../
       SPARK_HOME: ${{ github.workspace }}/../spark/
+      YDATA_PROFILING_NO_ANALYTICS: ${{ matrix.analytics }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup python

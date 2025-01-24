@@ -112,6 +112,8 @@ class TimeseriesVars(BaseModel):
     lags: List[int] = [1, 7, 12, 24, 30]
     significance: float = 0.05
     pacf_acf_lag: int = 100
+    autolag: Optional[str] = "AIC"
+    maxlag: Optional[int] = None
 
 
 class Univariate(BaseModel):
@@ -173,6 +175,7 @@ class Plot(BaseModel):
     histogram: Histogram = Histogram()
     scatter_threshold: int = 1000
     cat_freq: CatFrequencyPlot = CatFrequencyPlot()
+    font_path: Optional[Union[Path, str]] = None
 
 
 class Theme(Enum):
@@ -190,7 +193,7 @@ class Style(BaseModel):
         return self.primary_colors[0]
 
     # Primary color used for comparisons (default: blue, red, green)
-    primary_colors: List[str] = ["#377eb8", "#e41a1c", "#4daf4a"]
+    primary_colors: List[str] = ["#0d6efd", "#dc3545", "#198754"]
 
     # Base64-encoded logo image
     logo: str = ""
@@ -409,7 +412,7 @@ class Config:
             "duplicates": None,
             "vars": {"cat": {"redact": True}, "text": {"redact": True}},
         },
-        "dark_mode": {
+        "flatly_theme": {
             "html": {
                 "style": {
                     "theme": Theme.flatly,
@@ -417,7 +420,7 @@ class Config:
                 }
             }
         },
-        "orange_mode": {
+        "united_theme": {
             "html": {
                 "style": {
                     "theme": Theme.united,

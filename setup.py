@@ -33,12 +33,14 @@ setup(
     install_requires=requirements,
     extras_require={
         "notebook": [
-            "jupyter-client>=5.3.4",
-            "jupyter-core>=4.6.3",
+            "jupyter>=1.0.0",
             "ipywidgets>=7.5.1",
         ],
         "unicode": [
             "tangled-up-in-unicode==0.2.0",
+        ],
+        "numba": [
+            "numba>=0.56.0, <1",
         ],
     },
     package_data={

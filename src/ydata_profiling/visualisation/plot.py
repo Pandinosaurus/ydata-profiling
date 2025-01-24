@@ -27,6 +27,7 @@ def format_fn(tick_val: int, tick_pos: Any) -> str:
 
 
 def _plot_word_cloud(
+    config: Settings,
     series: Union[pd.Series, List[pd.Series]],
     figsize: tuple = (6, 4),
 ) -> plt.Figure:
@@ -36,7 +37,12 @@ def _plot_word_cloud(
     for i, series_data in enumerate(series):
         word_dict = series_data.to_dict()
         wordcloud = WordCloud(
-            background_color="white", random_state=123, width=300, height=200, scale=2
+            font_path=config.plot.font_path,
+            background_color="white",
+            random_state=123,
+            width=300,
+            height=200,
+            scale=2,
         ).generate_from_frequencies(word_dict)
 
         ax = plot.add_subplot(1, len(series), i + 1)
@@ -124,7 +130,7 @@ def _plot_histogram(
 
 @manage_matplotlib_context()
 def plot_word_cloud(config: Settings, word_counts: pd.Series) -> str:
-    _plot_word_cloud(series=word_counts)
+    _plot_word_cloud(config=config, series=word_counts)
     return plot_360_n0sc0pe(config)
 
 
@@ -586,13 +592,14 @@ def plot_timeseries_gap_analysis(
                 label=label,
                 color=color,
                 alpha=0.65,
+                x_compat=True,
             )
             _format_ts_date_axis(serie, ax)
             ax.yaxis.set_major_locator(MaxNLocator(integer=True))
             for gap in gaps_:
                 ax.fill_between(x=gap, y1=min_, y2=max_, color=color, alpha=0.25)
     else:
-        series.plot(ax=ax)
+        series.plot(ax=ax, x_compat=True)
         _format_ts_date_axis(series, ax)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
@@ -671,11 +678,11 @@ def _plot_timeseries(
         colors = create_comparison_color_list(config)
 
         for serie, color, label in zip(series, colors, labels):
-            ax = serie.plot(color=color, label=label, alpha=0.75)
+            ax = serie.plot(color=color, label=label, alpha=0.75, x_compat=True)
             _format_ts_date_axis(serie, ax)
 
     else:
-        ax = series.plot(color=config.html.style.primary_colors[0])
+        ax = series.plot(color=config.html.style.primary_colors[0], x_compat=True)
         _format_ts_date_axis(series, ax)
 
     return plot
@@ -833,12 +840,16 @@ def _prepare_heatmap_data(
     )
 
     df = df.groupby([entity_column, "__bins"])[sortbykey].count()
-    df = df.reset_index().pivot_table(entity_column, "__bins", sortbykey).T
+    df = (
+        df.reset_index()
+        .pivot_table(values=sortbykey, index="__bins", columns=entity_column)
+        .T
+    )
 
     if selected_entities:
-        df = df[selected_entities].T
+        df = df[selected_entities]
     else:
-        df = df.T[:max_entities]
+        df = df[:max_entities]
 
     return df
 
